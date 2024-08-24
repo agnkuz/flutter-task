@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_recruitment_task/models/products_page.dart';
@@ -58,10 +56,7 @@ class _ProductsSliverList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final products = state.pages
-        .map((page) => page.products)
-        .expand((product) => product)
-        .toList();
+    final products = state.pages.map((page) => page.products).expand((product) => product).toList();
 
     return SliverList.separated(
       itemCount: products.length,
@@ -112,16 +107,21 @@ class _TagWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const possibleColors = Colors.primaries;
-    final color = possibleColors[Random().nextInt(possibleColors.length)];
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Chip(
-        color: MaterialStateProperty.all(color),
+        color: MaterialStateProperty.all(_getTagColor()),
         label: Text(tag.label),
       ),
     );
+  }
+
+  Color _getTagColor() {
+    String colorString = '0xFF${tag.color.substring(1)}';
+    // in case the color parameter is malformed, use eg. white
+    Color color = Color(int.tryParse(colorString) ?? 0xFFFFFF);
+
+    return color;
   }
 }
 
