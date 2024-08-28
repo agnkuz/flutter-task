@@ -17,9 +17,9 @@ class App extends StatelessWidget {
     return MaterialApp(
       home: BlocProvider(
         create: (context) {
-          return HomeCubit(productsRepository)..getNextPage();
+          return HomeCubit(productsRepository);
         },
-        child: const HomePage(),
+        child: const HomePage(productId: '60'),
       ),
     );
   }

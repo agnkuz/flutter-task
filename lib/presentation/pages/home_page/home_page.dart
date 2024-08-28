@@ -3,11 +3,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_recruitment_task/models/products_page.dart';
 import 'package:flutter_recruitment_task/presentation/pages/home_page/home_cubit.dart';
 import 'package:flutter_recruitment_task/presentation/widgets/big_text.dart';
+import 'package:scrollview_observer/scrollview_observer.dart';
 
 const _mainPadding = EdgeInsets.all(16.0);
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key, this.productId});
+
+  final String? productId;
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<HomeCubit>().getNextPage(productId: widget.productId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +45,7 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class _LoadedWidget extends StatelessWidget {
+class _LoadedWidget extends StatefulWidget {
   const _LoadedWidget({
     required this.state,
   });
@@ -39,46 +53,109 @@ class _LoadedWidget extends StatelessWidget {
   final Loaded state;
 
   @override
-  Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        _ProductsSliverList(state: state),
-        const _GetNextPageButton(),
-      ],
-    );
-  }
+  State<_LoadedWidget> createState() => _LoadedWidgetState();
 }
 
-class _ProductsSliverList extends StatelessWidget {
-  const _ProductsSliverList({required this.state});
+class _LoadedWidgetState extends State<_LoadedWidget> {
+  late final ScrollController _scrollController = ScrollController();
+  late final ListObserverController _observerController = ListObserverController(controller: _scrollController);
+  late final List<Product> _products;
 
-  final Loaded state;
+  @override
+  void initState() {
+    super.initState();
+    _products = widget.state.pages.map((page) => page.products).expand((product) => product).toList();
+    final productToScroll = widget.state.productToScrollTo;
+
+    if (productToScroll != null) {
+      final indexToScroll = _products.indexOf(widget.state.productToScrollTo!);
+
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _observerController.animateTo(
+          index: indexToScroll,
+          duration: const Duration(seconds: 1),
+          curve: Curves.easeInOut,
+        );
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final products = state.pages.map((page) => page.products).expand((product) => product).toList();
+    return ListViewObserver(
+      controller: _observerController,
+      child: _ProductsList(
+        products: _products,
+        scrollController: _scrollController,
+      ),
+    );
+  }
 
-    return SliverList.separated(
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+}
+
+class _ProductsList extends StatefulWidget {
+  const _ProductsList({
+    required this.products,
+    required this.scrollController,
+  });
+
+  final List<Product> products;
+  final ScrollController scrollController;
+
+  @override
+  State<_ProductsList> createState() => _ProductsListState();
+}
+
+class _ProductsListState extends State<_ProductsList> {
+  @override
+  Widget build(BuildContext context) {
+    final products = widget.products;
+
+    return ListView.separated(
+      controller: widget.scrollController,
       itemCount: products.length,
-      itemBuilder: (context, index) => _ProductCard(products[index]),
+      itemBuilder: (context, index) {
+        if (index == products.length - 1) {
+          return const _GetNextPageButton();
+        }
+
+        return _ProductCard(
+          isProductToScrollTo: 10 == index,
+          product: products[index],
+        );
+      },
       separatorBuilder: (context, index) => const Divider(),
     );
   }
 }
 
-class _ProductCard extends StatelessWidget {
-  const _ProductCard(this.product);
+class _ProductCard extends StatefulWidget {
+  const _ProductCard({
+    required this.product,
+    required this.isProductToScrollTo,
+  });
 
   final Product product;
+  final bool isProductToScrollTo;
 
+  @override
+  State<_ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<_ProductCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BigText(product.name),
-          _Tags(product: product),
+          BigText(widget.product.name),
+          _Tags(product: widget.product),
         ],
       ),
     );
@@ -130,11 +207,9 @@ class _GetNextPageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: TextButton(
-        onPressed: context.read<HomeCubit>().getNextPage,
-        child: const BigText('Get next page'),
-      ),
+    return TextButton(
+      onPressed: context.read<HomeCubit>().getNextPage,
+      child: const BigText('Get next page'),
     );
   }
 }
