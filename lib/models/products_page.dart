@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'products_page.g.dart';
@@ -16,8 +17,8 @@ class ProductsPage with _$ProductsPage {
 }
 
 @JsonSerializable()
-class Product {
-  Product({
+class Product extends Equatable {
+  const Product({
     required this.id,
     required this.name,
     required this.mainImage,
@@ -42,6 +43,20 @@ class Product {
   final String sellerId;
   final List<Tag> tags;
   final Offer offer;
+
+  @override
+  List<Object?> get props => [
+        id,
+        name,
+        mainImage,
+        description,
+        available,
+        isFavorite,
+        isBlurred,
+        sellerId,
+        tags,
+        offer,
+      ];
 }
 
 @JsonSerializable()

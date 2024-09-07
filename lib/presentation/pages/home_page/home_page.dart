@@ -4,6 +4,7 @@ import 'package:flutter_recruitment_task/models/products_page.dart';
 import 'package:flutter_recruitment_task/models/selected_filters.dart';
 import 'package:flutter_recruitment_task/presentation/pages/filters/filters_page.dart';
 import 'package:flutter_recruitment_task/presentation/pages/home_page/home_cubit.dart';
+import 'package:flutter_recruitment_task/presentation/pages/home_page/home_state.dart';
 import 'package:flutter_recruitment_task/presentation/widgets/big_text.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
 
@@ -68,9 +69,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  List<Product> _getProducts(Loaded state) {
-    return state.pages.map((page) => page.products).expand((product) => product).toList();
-  }
+  List<Product> _getProducts(Loaded state) =>
+      state.pages.map((page) => page.products).expand((product) => product).toList();
 }
 
 class _LoadedWidget extends StatefulWidget {

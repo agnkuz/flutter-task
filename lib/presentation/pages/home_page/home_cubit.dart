@@ -4,33 +4,8 @@ import 'package:flutter_recruitment_task/models/filter.dart';
 import 'package:flutter_recruitment_task/models/get_products_page.dart';
 import 'package:flutter_recruitment_task/models/products_page.dart';
 import 'package:flutter_recruitment_task/models/selected_filters.dart';
+import 'package:flutter_recruitment_task/presentation/pages/home_page/home_state.dart';
 import 'package:flutter_recruitment_task/repositories/products_repository.dart';
-
-sealed class HomeState {
-  const HomeState();
-}
-
-class Loading extends HomeState {
-  const Loading();
-}
-
-class Loaded extends HomeState {
-  const Loaded({
-    required this.pages,
-    this.productToScrollTo,
-    required this.selectedFilters,
-  });
-
-  final List<ProductsPage> pages;
-  final Product? productToScrollTo;
-  final SelectedFilters selectedFilters;
-}
-
-class Error extends HomeState {
-  const Error({required this.error});
-
-  final dynamic error;
-}
 
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit(this._productsRepository) : super(const Loading());
@@ -38,13 +13,8 @@ class HomeCubit extends Cubit<HomeState> {
   final ProductsRepository _productsRepository;
 
   final List<ProductsPage> _pages = [];
-  var _param = GetProductsPage(pageNumber: 1);
-  SelectedFilters _selectedFilters = const SelectedFilters(
-    tags: <String>[],
-    categories: <CategoryEnum>[],
-    minPrice: minPriceValue,
-    maxPrice: maxPriceValue,
-  );
+  var _param = const GetProductsPage(pageNumber: 1);
+  var _selectedFilters = SelectedFilters.empty();
 
   Future<void> getNextPage({
     String? productId,
@@ -56,7 +26,7 @@ class HomeCubit extends Cubit<HomeState> {
       if (totalPages != null && _param.pageNumber > totalPages) {
         if (productId != null) {
           _pages.removeRange(1, _pages.length);
-          _emitLoaded(selectedFilters: selectedFilters);
+          _emitLoaded();
         }
         return;
       }
@@ -75,13 +45,12 @@ class HomeCubit extends Cubit<HomeState> {
           final productToScroll = newPage.products.firstWhere((product) => product.id == productId);
           _emitLoaded(
             productToScrollTo: productToScroll,
-            selectedFilters: selectedFilters,
           );
         } catch (_) {
           getNextPage(productId: productId);
         }
       } else {
-        _emitLoaded(selectedFilters: selectedFilters);
+        _emitLoaded();
       }
     } catch (e) {
       emit(Error(error: e));
@@ -89,29 +58,28 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   void handleCategoryCheckbox(CategoryEnum category) {
-    List<CategoryEnum> updatedCategoriesList = [];
-    if (_selectedFilters.categories.contains(category)) {
-      updatedCategoriesList = _selectedFilters.categories.toList()..remove(category);
-    } else {
-      updatedCategoriesList = _selectedFilters.categories.toList()..add(category);
-    }
-    _selectedFilters = _selectedFilters.copyWith(categories: updatedCategoriesList);
+    _selectedFilters = _selectedFilters.copyWith(
+      categories: _selectedFilters.categories.contains(category)
+          ? (_selectedFilters.categories.toList()..remove(category))
+          : (_selectedFilters.categories.toList()..add(category)),
+    );
     applyFilters();
   }
 
   void handleTagCheckbox(String tag) {
-    List<String> updatedTagsList = [];
-    if (_selectedFilters.tags.contains(tag)) {
-      updatedTagsList = _selectedFilters.tags.toList()..remove(tag);
-    } else {
-      updatedTagsList = _selectedFilters.tags.toList()..add(tag);
-    }
-    _selectedFilters = _selectedFilters.copyWith(tags: updatedTagsList);
+    _selectedFilters = _selectedFilters.copyWith(
+      tags: _selectedFilters.tags.contains(tag)
+          ? (_selectedFilters.tags.toList()..remove(tag))
+          : (_selectedFilters.tags.toList()..add(tag)),
+    );
     applyFilters();
   }
 
   void handlePriceSliderChange(double minValue, double maxValue) {
-    _selectedFilters = _selectedFilters.copyWith(minPrice: minValue, maxPrice: maxValue);
+    _selectedFilters = _selectedFilters.copyWith(
+      minPrice: minValue,
+      maxPrice: maxValue,
+    );
     applyFilters();
   }
 
@@ -144,13 +112,11 @@ class HomeCubit extends Cubit<HomeState> {
       }
 
       filteredPages.add(page.copyWith(products: filteredProducts));
-      _emitFilteredPages(filteredPages);
-    }
-  }
-
-  void _emitFilteredPages(List<ProductsPage> filteredPages) => emit(
+      emit(
         Loaded(pages: filteredPages, selectedFilters: _selectedFilters),
       );
+    }
+  }
 
   void clearFilters() {
     _selectedFilters = _selectedFilters.copyWith(
@@ -162,7 +128,7 @@ class HomeCubit extends Cubit<HomeState> {
     emit(Loaded(pages: _pages, selectedFilters: _selectedFilters));
   }
 
-  void _emitLoaded({Product? productToScrollTo, SelectedFilters? selectedFilters}) {
+  void _emitLoaded({Product? productToScrollTo}) {
     emit(
       Loaded(
         pages: _pages,

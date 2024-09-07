@@ -5,6 +5,7 @@ import 'package:flutter_recruitment_task/presentation/pages/filters/expansion_pr
 import 'package:flutter_recruitment_task/presentation/pages/filters/expansion_tile_widget.dart';
 import 'package:flutter_recruitment_task/presentation/pages/filters/filters_cubit.dart';
 import 'package:flutter_recruitment_task/presentation/pages/home_page/home_cubit.dart';
+import 'package:flutter_recruitment_task/presentation/pages/home_page/home_state.dart';
 import 'package:flutter_recruitment_task/presentation/widgets/big_text.dart';
 
 class FiltersPage extends StatefulWidget {
