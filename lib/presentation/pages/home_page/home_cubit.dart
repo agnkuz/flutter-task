@@ -42,6 +42,8 @@ class HomeCubit extends Cubit<HomeState> {
   SelectedFilters _selectedFilters = const SelectedFilters(
     tags: <String>[],
     categories: <CategoryEnum>[],
+    minPrice: minPriceValue,
+    maxPrice: maxPriceValue,
   );
 
   Future<void> getNextPage({
@@ -108,6 +110,11 @@ class HomeCubit extends Cubit<HomeState> {
     applyFilters();
   }
 
+  void handlePriceSliderChange(double minValue, double maxValue) {
+    _selectedFilters = _selectedFilters.copyWith(minPrice: minValue, maxPrice: maxValue);
+    applyFilters();
+  }
+
   void applyFilters() {
     final filteredPages = <ProductsPage>[];
 
@@ -118,9 +125,8 @@ class HomeCubit extends Cubit<HomeState> {
 
         // Category filter
         if (_selectedFilters.categories.isNotEmpty) {
-          shouldAdd = shouldAdd &&
-              _selectedFilters.categories.any((chosenCategory) =>
-                  chosenCategory.keyWords.any((keyword) => product.name.toLowerCase().contains(keyword.toLowerCase())));
+          shouldAdd = _selectedFilters.categories.any((chosenCategory) =>
+              chosenCategory.keyWords.any((keyword) => product.name.toLowerCase().contains(keyword.toLowerCase())));
         }
 
         // Tag filter
@@ -128,44 +134,18 @@ class HomeCubit extends Cubit<HomeState> {
           shouldAdd = shouldAdd && product.tags.any((tag) => _selectedFilters.tags.contains(tag.tag));
         }
 
+        // Price filter
+        final price = product.offer.regularPrice.amount;
+        shouldAdd = shouldAdd && price >= _selectedFilters.minPrice && price <= _selectedFilters.maxPrice;
+
         if (shouldAdd && !filteredProducts.contains(product)) {
           filteredProducts.add(product);
         }
       }
 
-      // final filteredProducts = <Product>[];
-
-      // for (final product in page.products) {
-      //   // filter by category
-      //   if (_selectedFilters.categories.isNotEmpty) {
-      //     for (final chosenCategory in _selectedFilters.categories) {
-      //       for (final keyword in chosenCategory.keyWords) {
-      //         if (product.name.toLowerCase().contains(keyword.toLowerCase()) && !filteredProducts.contains(product)) {
-      //           filteredProducts.add(product);
-      //         }
-      //       }
-      //     }
-      //   }
-
-      //   // filter by tag
-      //   if (_selectedFilters.tags.isNotEmpty) {
-      //     for (final tag in _selectedFilters.tags) {
-      //       if (product.tags.any((element) => element.tag == tag) && !filteredProducts.contains(product)) {
-      //         filteredProducts.add(product);
-      //       }
-      //     }
-      //   }
-      // }
-
       filteredPages.add(page.copyWith(products: filteredProducts));
       _emitFilteredPages(filteredPages);
     }
-
-    // else {
-    //   // no filters selected, return all pages
-    //   filteredPages.addAll(_pages);
-    //   _emitFilteredPages(filteredPages);
-    // }
   }
 
   void _emitFilteredPages(List<ProductsPage> filteredPages) => emit(

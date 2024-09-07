@@ -22,8 +22,8 @@ SelectedFilters _$SelectedFiltersFromJson(Map<String, dynamic> json) {
 mixin _$SelectedFilters {
   List<String> get tags => throw _privateConstructorUsedError;
   List<CategoryEnum> get categories => throw _privateConstructorUsedError;
-  double? get minPrice => throw _privateConstructorUsedError;
-  double? get maxPrice => throw _privateConstructorUsedError;
+  double get minPrice => throw _privateConstructorUsedError;
+  double get maxPrice => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -40,8 +40,8 @@ abstract class $SelectedFiltersCopyWith<$Res> {
   $Res call(
       {List<String> tags,
       List<CategoryEnum> categories,
-      double? minPrice,
-      double? maxPrice});
+      double minPrice,
+      double maxPrice});
 }
 
 /// @nodoc
@@ -59,8 +59,8 @@ class _$SelectedFiltersCopyWithImpl<$Res, $Val extends SelectedFilters>
   $Res call({
     Object? tags = null,
     Object? categories = null,
-    Object? minPrice = freezed,
-    Object? maxPrice = freezed,
+    Object? minPrice = null,
+    Object? maxPrice = null,
   }) {
     return _then(_value.copyWith(
       tags: null == tags
@@ -71,14 +71,14 @@ class _$SelectedFiltersCopyWithImpl<$Res, $Val extends SelectedFilters>
           ? _value.categories
           : categories // ignore: cast_nullable_to_non_nullable
               as List<CategoryEnum>,
-      minPrice: freezed == minPrice
+      minPrice: null == minPrice
           ? _value.minPrice
           : minPrice // ignore: cast_nullable_to_non_nullable
-              as double?,
-      maxPrice: freezed == maxPrice
+              as double,
+      maxPrice: null == maxPrice
           ? _value.maxPrice
           : maxPrice // ignore: cast_nullable_to_non_nullable
-              as double?,
+              as double,
     ) as $Val);
   }
 }
@@ -94,8 +94,8 @@ abstract class _$$SelectedFiltersImplCopyWith<$Res>
   $Res call(
       {List<String> tags,
       List<CategoryEnum> categories,
-      double? minPrice,
-      double? maxPrice});
+      double minPrice,
+      double maxPrice});
 }
 
 /// @nodoc
@@ -111,8 +111,8 @@ class __$$SelectedFiltersImplCopyWithImpl<$Res>
   $Res call({
     Object? tags = null,
     Object? categories = null,
-    Object? minPrice = freezed,
-    Object? maxPrice = freezed,
+    Object? minPrice = null,
+    Object? maxPrice = null,
   }) {
     return _then(_$SelectedFiltersImpl(
       tags: null == tags
@@ -123,14 +123,14 @@ class __$$SelectedFiltersImplCopyWithImpl<$Res>
           ? _value._categories
           : categories // ignore: cast_nullable_to_non_nullable
               as List<CategoryEnum>,
-      minPrice: freezed == minPrice
+      minPrice: null == minPrice
           ? _value.minPrice
           : minPrice // ignore: cast_nullable_to_non_nullable
-              as double?,
-      maxPrice: freezed == maxPrice
+              as double,
+      maxPrice: null == maxPrice
           ? _value.maxPrice
           : maxPrice // ignore: cast_nullable_to_non_nullable
-              as double?,
+              as double,
     ));
   }
 }
@@ -141,8 +141,8 @@ class _$SelectedFiltersImpl implements _SelectedFilters {
   const _$SelectedFiltersImpl(
       {required final List<String> tags,
       required final List<CategoryEnum> categories,
-      this.minPrice,
-      this.maxPrice})
+      required this.minPrice,
+      required this.maxPrice})
       : _tags = tags,
         _categories = categories;
 
@@ -166,9 +166,9 @@ class _$SelectedFiltersImpl implements _SelectedFilters {
   }
 
   @override
-  final double? minPrice;
+  final double minPrice;
   @override
-  final double? maxPrice;
+  final double maxPrice;
 
   @override
   String toString() {
@@ -217,8 +217,8 @@ abstract class _SelectedFilters implements SelectedFilters {
   const factory _SelectedFilters(
       {required final List<String> tags,
       required final List<CategoryEnum> categories,
-      final double? minPrice,
-      final double? maxPrice}) = _$SelectedFiltersImpl;
+      required final double minPrice,
+      required final double maxPrice}) = _$SelectedFiltersImpl;
 
   factory _SelectedFilters.fromJson(Map<String, dynamic> json) =
       _$SelectedFiltersImpl.fromJson;
@@ -228,9 +228,9 @@ abstract class _SelectedFilters implements SelectedFilters {
   @override
   List<CategoryEnum> get categories;
   @override
-  double? get minPrice;
+  double get minPrice;
   @override
-  double? get maxPrice;
+  double get maxPrice;
   @override
   @JsonKey(ignore: true)
   _$$SelectedFiltersImplCopyWith<_$SelectedFiltersImpl> get copyWith =>

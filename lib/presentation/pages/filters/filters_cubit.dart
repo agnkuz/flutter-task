@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:flutter_recruitment_task/constants.dart';
 import 'package:flutter_recruitment_task/models/filter.dart';
 import 'package:flutter_recruitment_task/models/get_products_page.dart';
 import 'package:flutter_recruitment_task/models/products_page.dart';
@@ -17,12 +16,10 @@ class FiltersLoaded extends FiltersState {
   const FiltersLoaded({
     required this.tagsFilter,
     required this.categoriesFilter,
-    required this.priceFilter,
   });
 
   final TagFilter tagsFilter;
   final List<CategoryEnum> categoriesFilter;
-  final PriceFilter priceFilter;
 }
 
 class FiltersError extends FiltersState {
@@ -76,10 +73,6 @@ class FiltersCubit extends Cubit<FiltersState> {
       FiltersLoaded(
         tagsFilter: _tagsFilter!,
         categoriesFilter: CategoryEnum.values,
-        priceFilter: PriceFilter(
-          minValue: minPriceValue,
-          maxValue: maxPriceValue,
-        ),
       ),
     );
   }

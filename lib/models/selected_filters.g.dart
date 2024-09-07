@@ -13,8 +13,8 @@ _$SelectedFiltersImpl _$$SelectedFiltersImplFromJson(
       categories: (json['categories'] as List<dynamic>)
           .map((e) => $enumDecode(_$CategoryEnumEnumMap, e))
           .toList(),
-      minPrice: (json['minPrice'] as num?)?.toDouble(),
-      maxPrice: (json['maxPrice'] as num?)?.toDouble(),
+      minPrice: (json['minPrice'] as num).toDouble(),
+      maxPrice: (json['maxPrice'] as num).toDouble(),
     );
 
 Map<String, dynamic> _$$SelectedFiltersImplToJson(

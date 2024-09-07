@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_recruitment_task/models/filter.dart';
+import 'package:flutter_recruitment_task/presentation/pages/filters/expansion_price_widget.dart';
 import 'package:flutter_recruitment_task/presentation/pages/filters/expansion_tile_widget.dart';
 import 'package:flutter_recruitment_task/presentation/pages/filters/filters_cubit.dart';
 import 'package:flutter_recruitment_task/presentation/pages/home_page/home_cubit.dart';
@@ -21,9 +22,6 @@ class FiltersPage extends StatefulWidget {
 }
 
 class _FiltersPageState extends State<FiltersPage> {
-  double? _selectedMinValue;
-  double? _selectedMaxValue;
-
   @override
   void initState() {
     super.initState();
@@ -71,9 +69,6 @@ class _FiltersPageState extends State<FiltersPage> {
   }
 
   Widget _getLoadedWidget(FiltersLoaded state) {
-    final minValue = state.priceFilter.minValue;
-    final maxValue = state.priceFilter.maxValue;
-
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, homeState) {
         final selectedFilters = switch (homeState) {
@@ -99,33 +94,7 @@ class _FiltersPageState extends State<FiltersPage> {
               filterType: FilterType.tag,
             ),
             const SizedBox(height: 10),
-            ExpansionTile(
-              title: const Text('Cena'),
-              children: [
-                RangeSlider(
-                  values: RangeValues(
-                    _selectedMinValue ?? minValue,
-                    _selectedMaxValue ?? maxValue,
-                  ),
-                  min: state.priceFilter.minValue,
-                  max: state.priceFilter.maxValue,
-                  onChanged: (RangeValues values) {
-                    setState(() {
-                      //TODO move to a separate file
-                      _selectedMinValue = values.start;
-                      _selectedMaxValue = values.end;
-                    });
-                  },
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('${(_selectedMinValue ?? minValue).toStringAsFixed(0)} zł'),
-                    Text('${(_selectedMaxValue ?? maxValue).toStringAsFixed(0)} zł'),
-                  ],
-                ),
-              ],
-            ),
+            ExpansionPriceWidget(selectedFilters: selectedFilters),
             const SizedBox(height: 200),
           ],
         );
