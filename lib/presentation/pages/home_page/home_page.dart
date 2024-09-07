@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_recruitment_task/models/products_page.dart';
+import 'package:flutter_recruitment_task/models/selected_filters.dart';
+import 'package:flutter_recruitment_task/presentation/pages/filters/filters_page.dart';
 import 'package:flutter_recruitment_task/presentation/pages/home_page/home_cubit.dart';
 import 'package:flutter_recruitment_task/presentation/widgets/big_text.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
@@ -25,32 +27,62 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const BigText('Products'),
-      ),
-      body: Padding(
-        padding: _mainPadding,
-        child: BlocBuilder<HomeCubit, HomeState>(
-          builder: (context, state) {
-            return switch (state) {
+    return BlocBuilder<HomeCubit, HomeState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const BigText('Products'),
+            actions: [
+              switch (state) {
+                Loading() => const SizedBox.shrink(),
+                Error() => const SizedBox.shrink(),
+                Loaded() => IconButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => FiltersPage(
+                          onApplyTap: () => context.read<HomeCubit>().applyFilters(),
+                          onClearTap: () => context.read<HomeCubit>().clearFilters(),
+                        ),
+                      ),
+                    ),
+                    icon: const Icon(Icons.tune),
+                  ),
+              }
+            ],
+          ),
+          body: Padding(
+            padding: _mainPadding,
+            child: switch (state) {
               Error() => BigText('Error: ${state.error}'),
               Loading() => const BigText('Loading...'),
-              Loaded() => _LoadedWidget(state: state),
-            };
-          },
-        ),
-      ),
+              Loaded() => _LoadedWidget(
+                  productToScrollTo: state.productToScrollTo,
+                  products: _getProducts(state),
+                  selectedFilters: state.selectedFilters,
+                ),
+            },
+          ),
+        );
+      },
     );
+  }
+
+  List<Product> _getProducts(Loaded state) {
+    return state.pages.map((page) => page.products).expand((product) => product).toList();
   }
 }
 
 class _LoadedWidget extends StatefulWidget {
   const _LoadedWidget({
-    required this.state,
+    this.productToScrollTo,
+    required this.products,
+    this.selectedFilters,
   });
 
-  final Loaded state;
+  final Product? productToScrollTo;
+  final List<Product> products;
+  final SelectedFilters? selectedFilters;
 
   @override
   State<_LoadedWidget> createState() => _LoadedWidgetState();
@@ -59,16 +91,13 @@ class _LoadedWidget extends StatefulWidget {
 class _LoadedWidgetState extends State<_LoadedWidget> {
   late final ScrollController _scrollController = ScrollController();
   late final ListObserverController _observerController = ListObserverController(controller: _scrollController);
-  late final List<Product> _products;
 
   @override
   void initState() {
     super.initState();
-    _products = widget.state.pages.map((page) => page.products).expand((product) => product).toList();
-    final productToScroll = widget.state.productToScrollTo;
 
-    if (productToScroll != null) {
-      final indexToScroll = _products.indexOf(widget.state.productToScrollTo!);
+    if (widget.productToScrollTo != null) {
+      final indexToScroll = widget.products.indexOf(widget.productToScrollTo!);
 
       Future.delayed(const Duration(milliseconds: 500), () {
         _observerController.animateTo(
@@ -85,8 +114,9 @@ class _LoadedWidgetState extends State<_LoadedWidget> {
     return ListViewObserver(
       controller: _observerController,
       child: _ProductsList(
-        products: _products,
+        products: widget.products,
         scrollController: _scrollController,
+        selectedFilters: widget.selectedFilters,
       ),
     );
   }
@@ -102,10 +132,12 @@ class _ProductsList extends StatefulWidget {
   const _ProductsList({
     required this.products,
     required this.scrollController,
+    this.selectedFilters,
   });
 
   final List<Product> products;
   final ScrollController scrollController;
+  final SelectedFilters? selectedFilters;
 
   @override
   State<_ProductsList> createState() => _ProductsListState();
@@ -116,12 +148,16 @@ class _ProductsListState extends State<_ProductsList> {
   Widget build(BuildContext context) {
     final products = widget.products;
 
+    if (products.isEmpty) {
+      return const Center(child: BigText('Brak wyników'));
+    }
+
     return ListView.separated(
       controller: widget.scrollController,
       itemCount: products.length,
       itemBuilder: (context, index) {
         if (index == products.length - 1) {
-          return const _GetNextPageButton();
+          return _GetNextPageButton(selectedFilters: widget.selectedFilters);
         }
 
         return _ProductCard(
@@ -203,12 +239,16 @@ class _TagWidget extends StatelessWidget {
 }
 
 class _GetNextPageButton extends StatelessWidget {
-  const _GetNextPageButton();
+  const _GetNextPageButton({this.selectedFilters});
+
+  final SelectedFilters? selectedFilters;
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: context.read<HomeCubit>().getNextPage,
+      onPressed: () => context.read<HomeCubit>().getNextPage(
+            selectedFilters: selectedFilters,
+          ),
       child: const BigText('Get next page'),
     );
   }

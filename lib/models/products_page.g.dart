@@ -6,23 +6,6 @@ part of 'products_page.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ProductsPage _$ProductsPageFromJson(Map<String, dynamic> json) => ProductsPage(
-      totalPages: (json['totalPages'] as num).toInt(),
-      pageNumber: (json['pageNumber'] as num).toInt(),
-      pageSize: (json['pageSize'] as num).toInt(),
-      products: (json['products'] as List<dynamic>)
-          .map((e) => Product.fromJson(e as Map<String, dynamic>))
-          .toList(),
-    );
-
-Map<String, dynamic> _$ProductsPageToJson(ProductsPage instance) =>
-    <String, dynamic>{
-      'pageNumber': instance.pageNumber,
-      'pageSize': instance.pageSize,
-      'totalPages': instance.totalPages,
-      'products': instance.products,
-    };
-
 Product _$ProductFromJson(Map<String, dynamic> json) => Product(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -132,4 +115,22 @@ Map<String, dynamic> _$NormalizedPriceToJson(NormalizedPrice instance) =>
       'amount': instance.amount,
       'currency': instance.currency,
       'unitLabel': instance.unitLabel,
+    };
+
+_$ProductsPageImpl _$$ProductsPageImplFromJson(Map<String, dynamic> json) =>
+    _$ProductsPageImpl(
+      totalPages: (json['totalPages'] as num).toInt(),
+      pageNumber: (json['pageNumber'] as num).toInt(),
+      pageSize: (json['pageSize'] as num).toInt(),
+      products: (json['products'] as List<dynamic>)
+          .map((e) => Product.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$$ProductsPageImplToJson(_$ProductsPageImpl instance) =>
+    <String, dynamic>{
+      'totalPages': instance.totalPages,
+      'pageNumber': instance.pageNumber,
+      'pageSize': instance.pageSize,
+      'products': instance.products,
     };

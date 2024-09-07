@@ -1,23 +1,18 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'products_page.g.dart';
+part 'products_page.freezed.dart';
 
-@JsonSerializable()
-class ProductsPage {
-  ProductsPage({
-    required this.totalPages,
-    required this.pageNumber,
-    required this.pageSize,
-    required this.products,
-  });
+@freezed
+class ProductsPage with _$ProductsPage {
+  const factory ProductsPage({
+    required int totalPages,
+    required int pageNumber,
+    required int pageSize,
+    required List<Product> products,
+  }) = _ProductsPage;
 
-  factory ProductsPage.fromJson(Map<String, dynamic> json) =>
-      _$ProductsPageFromJson(json);
-
-  final int pageNumber;
-  final int pageSize;
-  final int totalPages;
-  final List<Product> products;
+  factory ProductsPage.fromJson(Map<String, dynamic> json) => _$ProductsPageFromJson(json);
 }
 
 @JsonSerializable()
@@ -35,8 +30,7 @@ class Product {
     required this.offer,
   });
 
-  factory Product.fromJson(Map<String, dynamic> json) =>
-      _$ProductFromJson(json);
+  factory Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
 
   final String id;
   final String name;
@@ -123,8 +117,7 @@ class NormalizedPrice {
     required this.unitLabel,
   });
 
-  factory NormalizedPrice.fromJson(Map<String, dynamic> json) =>
-      _$NormalizedPriceFromJson(json);
+  factory NormalizedPrice.fromJson(Map<String, dynamic> json) => _$NormalizedPriceFromJson(json);
 
   final double amount;
   final String currency;
