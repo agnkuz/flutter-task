@@ -74,6 +74,25 @@ main() {
       expect(loadedState.selectedFilters, equals(emptyFilters));
     });
 
+    test('fetches next page successfully', () async {
+      when(() => mockProductsRepository.getProductsPage(const GetProductsPage(pageNumber: 1)))
+          .thenAnswer((_) => Future.value(expectedPage));
+      when(() => mockProductsRepository.getProductsPage(const GetProductsPage(pageNumber: 2)))
+          .thenAnswer((_) => Future.value(unfilteredPage));
+
+      final cubit = HomeCubit(mockProductsRepository);
+
+      await cubit.getNextPage();
+      await pumpEventQueue();
+      await cubit.getNextPage();
+      await pumpEventQueue();
+
+      expect(cubit.state, isA<Loaded>());
+      final loadedState = cubit.state as Loaded;
+      expect(loadedState.pages, equals([expectedPage, unfilteredPage]));
+      expect(loadedState.selectedFilters, equals(emptyFilters));
+    });
+
     test('filters page by tag', () async {
       when(() => mockProductsRepository.getProductsPage(const GetProductsPage(pageNumber: 1)))
           .thenAnswer((_) => Future.value(unfilteredPage));
@@ -130,7 +149,7 @@ main() {
       );
     });
 
-    test('filters page by price range', () async {
+    test('filters page by price range and tag', () async {
       const newMinPrice = 20.0;
       const newMaxPrice = 40.0;
 
@@ -141,6 +160,7 @@ main() {
 
       await cubit.getNextPage();
       cubit.handlePriceSliderChange(newMinPrice, newMaxPrice);
+      cubit.handleTagCheckbox('best');
       await pumpEventQueue();
 
       expect(cubit.state, isA<Loaded>());
@@ -152,13 +172,26 @@ main() {
         loadedState.selectedFilters,
         equals(
           const SelectedFilters(
-            tags: [],
+            tags: ['best'],
             categories: [],
             minPrice: newMinPrice,
             maxPrice: newMaxPrice,
           ),
         ),
       );
+    });
+
+    test('emits Error when getProductsPage call unsuccessful', () async {
+      when(() => mockProductsRepository.getProductsPage(const GetProductsPage(pageNumber: 1))).thenThrow(
+        Exception(),
+      );
+
+      final cubit = HomeCubit(mockProductsRepository);
+
+      await cubit.getNextPage();
+      await pumpEventQueue();
+
+      expect(cubit.state, isA<Error>());
     });
   });
 }
